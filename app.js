@@ -2,23 +2,35 @@ const express = require("express");
 const bodyParser = require("body-parser");
 
 const app = express();
+
+app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
 
 const index = "/index.html";
+let items = ["Buy Food", "Cook Food", "Eat Food"];
 
 app.get("/", (req, res) => {
   const date = new Date();
-  const currentDate = date.getDay();
 
-  if (currentDate === 6 || currentDate === 0) {
-    res.send("<h1>It is a weekend! Relax!</h1>");
-  } else {
-    res.sendFile(`${__dirname}${index}`);
+  const options = {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   }
 
-  // const isWeekend = currentDate === 6 ? res.send("<h1>Chill Saturday!</h1>")
-  // : currentDate === 0 ? res.send("<h1>Relaxing Sunday!</h1>")
-  // : res.sendFile(`${__dirname}${index}`);
+  let day = date.toLocaleDateString("en-US", options);
+
+  res.render("list", {
+    dayOfWeek: day,
+    newListItems: items
+  });
+})
+
+app.post("/", (req, res) => {
+  items.push(req.body.newItem);
+
+  res.redirect("/")
 })
 
 app.listen(3000, console.log("Server listening on Port 3000"));
