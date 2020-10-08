@@ -5,32 +5,36 @@ const app = express();
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(express.static("public"))
 
-const index = "/index.html";
-let items = ["Buy Food", "Cook Food", "Eat Food"];
+const date = require(`${__dirname}/date.js`);
+
+const items = ["Buy Food", "Cook Food", "Eat Food"];
+const workItems = [];
 
 app.get("/", (req, res) => {
-  const date = new Date();
+  const day = date.getDate();
 
-  const options = {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }
+  res.render("list", {listTitle: day, newListItems: items});
+})
 
-  let day = date.toLocaleDateString("en-US", options);
+app.get("/work", (req, res) => {
+  res.render("list", {listTitle: "Work List", newListItems: workItems})
+})
 
-  res.render("list", {
-    dayOfWeek: day,
-    newListItems: items
-  });
+app.get("/about", (req, res) => {
+  res.render("about");
 })
 
 app.post("/", (req, res) => {
-  items.push(req.body.newItem);
 
-  res.redirect("/")
+  if (req.body.list === "Work") {
+    workItems.push(req.body.newItem);
+    res.redirect("/work")
+  } else {
+    items.push(req.body.newItem);
+    res.redirect("/")
+  }
 })
 
 app.listen(3000, console.log("Server listening on Port 3000"));
